@@ -1,0 +1,8 @@
+# render / print artifacts
+*.png
+*.stl
+*.3mf
+*.svg
+
+# macOS
+.DS_Store
