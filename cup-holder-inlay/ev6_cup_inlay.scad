@@ -18,7 +18,7 @@
 //
 // Coordinate system: X transverse, +X = driver side (LHD), -X = passenger;
 // Y fore-aft, +Y toward the rear trays; z=0 = lower (rear) tray floor,
-// z=LIFT = front pocket floor, z=H_DEPTH = console top surface.
+// z=LIFT = front pocket floor, z=H_top(y) = slanted console top.
 
 // ================= grip mechanism =================
 // Arc-segment leaf-spring tabs (see lib_parts.scad): the arm is an annular
@@ -52,13 +52,11 @@ include <lib_parts.scad>
 // defl: render the grip arms deflected outward from the printed (empty)
 // state -- 0 for a bare inlay, cup_deflection(d) to show a cup engaged.
 module inlay(defl = 0) {
-    difference() {
-        union() {
-            inlay_shell();
-            grip_tabs(defl);
-            factory_tab_bosses();   // solid bosses (channels cut below)
-        }
-        factory_tab_channels();     // open the trap channels
+    union() {
+        inlay_shell();
+        grip_tabs(defl);
+        factory_tab_bosses();   // flush-press bosses; no channels — the
+                                // flaps fold behind the inlay wall (lib_parts)
     }
 }
 
@@ -74,10 +72,12 @@ module assembly() {
 assembly();
 
 // ================= clearance / fit report =================
-// Pocket void ID: 70.8 mm at the seating level (STL cavity 75.07 minus
-// TOL+WALL), opening to 78.2 mm at the console top (the 3.7 mm/side lean).
+echo("console top: front = ", H_TOP_FRONT, " mm, rear = ", H_top(Y_T3_REAR),
+     " mm, slant = ", SLANT_ANG, " deg");
 echo("front pocket ID @ seat = ", 2 * (R_T1_BOT - TOL - WALL),
      " mm (STL cavity 75.07)");
+echo("front pocket ID @ top  = ", 2 * (r_pocket(H_TOP_FRONT) - TOL - WALL),
+     " mm (lean continued past the STL cone, see H_FRONT_MAT)");
 echo("front pocket ID @ grip = ", 2 * R_PKT_GRIP, " mm (z = ", GRIP_ZC, ")");
 echo("thermos radial play    = ", R_PKT_GRIP - CUP_MIN_D / 2,
      " mm/side at the grip band (closed by the pads)");

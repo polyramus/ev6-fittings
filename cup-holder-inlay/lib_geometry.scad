@@ -6,7 +6,7 @@
 //   Y  fore-aft,      +Y = toward the rear trays (frontmost tray at low Y)
 //   Z  vertical,      z=0 = floor of the LOWER (rear two) trays
 //                     z=LIFT = floor of the frontmost tray + passage 1
-//                     z=H_DEPTH = console top surface (inlay is flush)
+//                     z=H_top(y) = slanted console top (inlay is flush)
 //
 // Dimension provenance (2026-09-09):
 //   - Front pocket: data/EV6 Utility Cup.stl (Thingiverse "EV6 Utility Cup
@@ -25,8 +25,12 @@ LIFT       = 8.0;      // front tray + passage 1 elevated this much
 R_T1_BOT   = 37.535;   // front pocket radius at seating level (STL, Ø75.07;
                        // owner's TPU-mat caliper read 74 — the mat is soft)
 R_T1_TOP   = 41.23;    // front pocket radius at the console surface (STL)
-H_FRONT    = 62.5;     // front section height: seating level -> console (STL)
-H_DEPTH    = LIFT + H_FRONT;  // 70.5, rear floor -> console
+H_FRONT    = 62.5;     // height of the front pocket's CONE (STL); the pocket
+                       // itself is taller (~79 from the mat to the console
+                       // top) — the measured lean is assumed to continue
+                       // above the cone, see r_pocket
+SLANT_CLIP_Z = 90.0;   // build everything this tall, then trim with the
+                       // slant plane; just needs to exceed H_TOP_FRONT
 P1_W       = 24.0;     // passage 1 width (owner; mat waist confirms 24.0)
 P1_L       = 32.0;     // passage 1 visible length, tangent -> step
 T2_W       = 75.0;     // tray 2 max width
@@ -47,26 +51,28 @@ TIP_W      = 12.0;     // photo estimate: flat at the passenger tip
 R_T3_CORNER= 6.0;      // tip chamfer/round (photo: "rounded corner", LHD = -X)
 TAB1_ANG   = [45, 135];   // front-pocket tab angles: ~45 deg from the rear
                           // (passage) centerline each side (photo IMG_5345,
-                          // 2026-09-10; both factory tabs are broken at the
-                          // tip, which is the rattle source)
+                          // 2026-09-10; the white lines in the photo are
+                          // duct-tape residue from earlier makeshift tab
+                          // fastening — the tabs themselves are intact)
 TAB_W      = 7.5;    // factory tab width (user)
 TAB_H      = 30.0;   // wall opening height (user)
 TAB_TRAVEL = 14.0;   // free-end travel at rest; folds fully into the wall
 TAB_SEAT   = 0.2;    // boss face sits this far in front of the console wall
                      // face, so a folded flap can only bulge 0.2 mm
-TAB1_Z0    = 0.0;    // TODO: opening bottom above the pocket floor — the
-                     // photo shows the tabs sitting low, pivot ~TAB_H up
+TAB1_Z0    = 30.0;   // opening bottom above the pocket floor (user gauge,
+                     // 2026-09-10: "fairly high, ~30 mm"; pivot then ~60 up,
+                     // i.e. near the top of the ~79 mm pocket)
 BOSS_MARGIN= 1.5;    // boss margin around the opening
-TAB2_POS   = [[-31.5, 188], [31.5, 188]]; // photo: notch pair at the 75->51
-                          // step, ~6 in from each wall; y = Y_T2_REAR; caliper
-// Tray-2 tab traps (placeholder — the 75->51 step notch pair from the mat
-// photo; position/orientation still TODO). Same flap family as the
-// front-pocket tabs (TAB_W x TAB_H), but on a flat step wall, so they keep
-// the simpler box boss + channel until confirmed.
-BOSS_W     = TAB_W + 3.0;   // tray-2 trap boss width
-BOSS_LEN   = 6.0;           // TODO: tray-2 boss depth into pocket
-TAB_CH_W   = TAB_W + 0.5;   // tray-2 channel width
-TAB_CH_D   = 4.0;           // TODO: tray-2 channel depth (tab thickness + ~0.4)
+// Tray-2 tabs: same flap family (TAB_W x TAB_H), on the 75->51 step faces
+// (y = Y_T2_REAR, facing -Y), centred on the 12 mm ledge — the mat notch
+// pair is ~6 mm in from each passage-2 wall (photo). 38 mm above the
+// tray-2 floor = level with the front-pocket tabs (user 2026-09-10). No
+// inlay feature needed: the offset wall band over those faces is the
+// flush-press limiter (TOL of play). Documented for the A-frame work and
+// the README; not referenced by any geometry.
+TAB2_POS   = [[-31.5, 188], [31.5, 188]];  // y = Y_T2_REAR (188); literal
+                                            // because top-level assignments
+                                            // are order-dependent in OpenSCAD
 BRIDGE_LEN = 20.0;     // photo: passage-1 bridge, passenger side, spans 20 of
 BRIDGE_W   = 9.0;      // the 24 (mat slitted around it, flush with floor)
 BRIDGE_Y0  = 74.0;     // photo: ~76-88 from front edge
@@ -102,6 +108,40 @@ Y_P2_REAR    = Y_P2_FRONT + P2_L;       // <- 51->71 step, second notch pair
 Y_T3_FRONT   = Y_P2_REAR;
 Y_T3_TAPER1  = Y_T3_FRONT + T3_TAPER_L;
 Y_T3_REAR    = Y_T3_TAPER1 + L_T3_END_L; // passenger-side (longest) extent
+
+// ---------- slanted console top ----------
+// The console top is not flat: the owner's caliper reads 82 mm console-to-
+// floor at the front, ~75 at the back (to the molded floor; the TPU mat
+// under the front pocket is ~3 mm). With level floors (assumed, the exact
+// slant is hard to measure) the top is one plane through two anchors:
+//   front  (y=0, the pocket):  LIFT + H_FRONT_MAT above z=0
+//   rear   (y=Y_T3_REAR):      H_REAR above z=0
+H_FRONT_MAT  = 79.0;   // console top -> front pocket floor (mat top):
+                       // 82 to the molded floor minus the ~3 mat. If the
+                       // caliper actually rested on the mat, it is 82.
+                       // NOTE: the STL cone is only 62.5 tall, so this puts
+                       // ~17 mm of wall above the measured cone — the lean
+                       // is assumed to continue (see r_pocket).
+H_REAR       = 75.0;   // console top -> rear (lower) tray floor (user)
+H_TOP_FRONT  = LIFT + H_FRONT_MAT;   // 87, at y=0
+SLANT_Y      = Y_T3_REAR;            // the rear anchor, at the full extent
+function H_top(y) =                  // console top height at a given y
+    H_TOP_FRONT + (H_REAR - H_TOP_FRONT) * y / SLANT_Y;
+SLANT_ANG    = atan((H_TOP_FRONT - H_REAR) / SLANT_Y);  // ~2.3 deg, falls
+                                                        // to the rear
+// Removes everything above the slant top plane z = H_top(y). The inlay and
+// the cavity are both trimmed with it, so the inlay top is flush with the
+// console top along the whole slant.
+module slant_cutter() {
+    // Box extends far BEHIND the axis too (local y -500..+500): a box that
+    // only starts at the axis keeps its front face tilted with the rotation
+    // and leaves an untrimmed wedge in front of the pocket's forward
+    // overhang (the cone leans out past y=0 above ~z=55).
+    translate([-160, 0, H_TOP_FRONT])
+        rotate([-SLANT_ANG, 0, 0])
+            translate([0, -500, 0])
+                cube([320, 1000, 80]);
+}
 
 // ---------- 2D footprint of the rear (prismatic) part ----------
 // The front section is a CONE (see front_cavity), not a footprint slab.
@@ -173,19 +213,26 @@ module front_cone(r0, r1, z0, z1) {
     translate([0, Y_C1_CENTER]) cone2(r0, r1, z0, z1);
 }
 
-// The carved cavity itself (what the inlay fits into).
+// The carved cavity itself (what the inlay fits into): the full-height
+// shapes trimmed to the slant console top.
 module cavity() {
-    union() {
-        // front: cone + passage slot, floor at z=LIFT
-        front_cone(R_T1_BOT, R_T1_TOP, LIFT, H_DEPTH);
-        passage1_box(P1_W / 2, LIFT, H_DEPTH);
-        // rear: prismatic, floor at z=0
-        linear_extrude(H_DEPTH)
-            footprint_slab(Y_P1_REAR, 400);
+    difference() {
+        union() {
+            // front: cone (lean continued past the measured cone) + passage
+            // slot, floor at z=LIFT
+            front_cone(R_T1_BOT, r_pocket(SLANT_CLIP_Z), LIFT, SLANT_CLIP_Z);
+            passage1_box(P1_W / 2, LIFT, SLANT_CLIP_Z);
+            // rear: prismatic, floor at z=0
+            linear_extrude(SLANT_CLIP_Z)
+                footprint_slab(Y_P1_REAR, 400);
+        }
+        slant_cutter();
     }
 }
 
-// Pocket inner radius at height z (front section only).
+// Front-pocket radius at height z. Measured only over LIFT..LIFT+H_FRONT
+// (the STL cone); above that the same lean is assumed to continue — the
+// pocket is ~17 mm taller than the cone (see H_FRONT_MAT).
 function r_pocket(z) =
     R_T1_BOT + (R_T1_TOP - R_T1_BOT) * (z - LIFT) / H_FRONT;
 
@@ -198,15 +245,19 @@ module inlay_shell() {
         // ---- front (conical) section ----
         difference() {
             union() {
-                front_cone(R_T1_BOT - TOL, R_T1_TOP - TOL, LIFT, H_DEPTH);
-                passage1_box(P1_W / 2 - TOL, LIFT, H_DEPTH);
+                front_cone(R_T1_BOT - TOL, r_pocket(SLANT_CLIP_Z) - TOL,
+                           LIFT, SLANT_CLIP_Z);
+                passage1_box(P1_W / 2 - TOL, LIFT, SLANT_CLIP_Z);
             }
             union() {
-                // void floor at z = LIFT + WALL, OPEN at z = H_DEPTH
-                front_cone(R_T1_BOT - TOL - WALL, R_T1_TOP - TOL - WALL,
-                           LIFT + WALL, H_DEPTH);
-                passage1_box(P1_W / 2 - TOL - WALL, LIFT + WALL, H_DEPTH);
+                // void floor at z = LIFT + WALL, OPEN at the slant top
+                front_cone(R_T1_BOT - TOL - WALL,
+                           r_pocket(SLANT_CLIP_Z) - TOL - WALL,
+                           LIFT + WALL, SLANT_CLIP_Z);
+                passage1_box(P1_W / 2 - TOL - WALL, LIFT + WALL,
+                             SLANT_CLIP_Z);
             }
+            slant_cutter();
             // passage-1 bridge relief: the car's bridge (passenger side,
             // spans 20 of the 24) is flush with the TPU mat, so the inlay
             // floor gets a shallow pocket under it and the inlay seats at
@@ -219,14 +270,15 @@ module inlay_shell() {
 
         // ---- rear (prismatic) section ----
         difference() {
-            linear_extrude(H_DEPTH)
+            linear_extrude(SLANT_CLIP_Z)
                 offset(-TOL) footprint_slab(Y_P1_REAR - 0.5, 400 + TOL);
             // inner void: offset in by WALL + TOL, floor WALL thick, open at
-            // the top (z = H_DEPTH) -- the tray mouth must not be capped
+            // the slant top -- the tray mouth must not be capped
             translate([0, 0, WALL])
-                linear_extrude(H_DEPTH - WALL)
+                linear_extrude(SLANT_CLIP_Z - WALL)
                     offset(-(WALL + TOL))
                         footprint_slab(Y_P1_REAR - 0.5, 400 + WALL + TOL);
+            slant_cutter();
         }
     }
 }
