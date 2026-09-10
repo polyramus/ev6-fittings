@@ -78,6 +78,20 @@ BRIDGE_W   = 9.0;      // the 24 (mat slitted around it, flush with floor)
 BRIDGE_Y0  = 74.0;     // photo: ~76-88 from front edge
 BRIDGE_RELIEF = 1.0;   // relief depth in the inlay passage floor under it
 
+// ---------- A-frame floor studs (interface with aframe / lib_parts) ----------
+// The two molded-floor studs the A-frame's inside supports clamp onto.
+// The span is the shimmed 50.5 (factory 50 + the owner's 0.5); that
+// interference is what cams the pocket wall outward when the frame is
+// pressed down. The studs sit BELOW the inlay floor, so STUD_HOLES opens
+// it where the studs poke through — needed for the inlay-fit frame.
+STUD_X_SPAN = 50.5;    // shimmed support span (factory 50 + 0.5)
+STUD_Y      = 20.0;    // ASSUMED: stud centreline from the pocket front
+                       // (y=0). Primary car fact — the A-frame's
+                       // AFRAME_Y0 derives from it (lib_aframe).
+STUD_D      = 5.0;     // ASSUMED stud diameter
+STUD_HOLES  = true;    // cut the floor holes in the inlay
+STUD_HOLE_D = STUD_D + 1.5;  // clearance over the stud for the C-hook slot
+
 // ---------- inlay / print ----------
 WALL       = 2.0;      // inlay wall thickness
 TOL        = 0.15;     // fit clearance per side vs the car (FDM)
@@ -266,6 +280,13 @@ module inlay_shell() {
             if (BRIDGE_RELIEF > 0)
                 translate([-P1_W / 2, BRIDGE_Y0, LIFT + WALL - BRIDGE_RELIEF])
                     cube([BRIDGE_LEN, BRIDGE_W, BRIDGE_RELIEF]);
+            // A-frame stud holes: the studs sit in the molded floor below
+            // the inlay floor; a frame fitted inside the inlay clamps them
+            // through these (the C-hook slots drop over the studs)
+            if (STUD_HOLES)
+                for (sx = [-1, 1])
+                    translate([sx * STUD_X_SPAN / 2, STUD_Y, LIFT - 0.5])
+                        cylinder(h = WALL + 1, d = STUD_HOLE_D);
         }
 
         // ---- rear (prismatic) section ----

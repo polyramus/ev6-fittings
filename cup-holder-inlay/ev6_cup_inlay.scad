@@ -10,6 +10,8 @@
 //   openscad -o inlay.png      -D 'TEST_CUP="none"'    ev6_cup_inlay.scad
 //   openscad -o thermos.png    -D 'TEST_CUP="thermos"' ev6_cup_inlay.scad
 //   openscad -o pet.png        -D 'TEST_CUP="pet"'     ev6_cup_inlay.scad
+//   openscad -o aframe_fit.png -D 'TEST_CUP="none"' -D 'SHOW_AFRAME=true' \
+//                              ev6_cup_inlay.scad      // A-frame clamp in the inlay
 //   (add -D 'SHOW_ENVELOPE=true' to ghost the car cavity around the inlay)
 //
 // Dimension provenance lives with the dimensions, in lib_geometry.scad
@@ -40,6 +42,11 @@ GRIP_Z_H     = 10.0;   // pad's bottom bridge short (FDM), land on the PET
 // ================= render switches =================
 TEST_CUP      = "thermos";  // "none" | "thermos" | "pet"
 SHOW_ENVELOPE = false;
+// A-frame divider fitted inside the inlay's front-pocket void (the "inlay"
+// fit from lib_aframe — the slightly-smaller clamp that pushes the wall out).
+// Render it alone (TEST_CUP="none"): the inlay goes translucent so the
+// band-vs-wall clearance (AFRAME_CLEAR) is visible.
+SHOW_AFRAME   = false;
 
 // High-poly circles (kit convention, cf. motor-bench/cad/params.scad): the
 // 74 mm pocket circle runs through offset() and CSG booleans.
@@ -47,6 +54,7 @@ $fn = 96;
 
 include <lib_geometry.scad>
 include <lib_parts.scad>
+include <lib_aframe.scad>   // the A-frame divider, rendered as a fitted test object
 
 // ================= assembly =================
 // defl: render the grip arms deflected outward from the printed (empty)
@@ -65,8 +73,11 @@ module assembly() {
            : TEST_CUP == "thermos" ? cup_deflection(CUP_MIN_D)
            : 0;
     if (SHOW_ENVELOPE) cavity_ghost();
-    color("#b8b8b0") inlay(defl);
+    // Translucent inlay while the A-frame test object is inside, so the
+    // band-vs-wall fit reads; the cup renders stay opaque.
+    color("#b8b8b0", SHOW_AFRAME ? 0.3 : 1.0) inlay(defl);
     if (TEST_CUP != "none") test_cups();
+    if (SHOW_AFRAME) color("#8a8a80") aframe("inlay");
 }
 
 assembly();
