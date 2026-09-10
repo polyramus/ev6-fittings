@@ -45,14 +45,28 @@ L_T3_END_L = 50.0;     // photo estimate: passenger (-X) end, the long one
 L_T3_END_R = 20.0;     // photo estimate: driver (+X) end, the short one
 TIP_W      = 12.0;     // photo estimate: flat at the passenger tip
 R_T3_CORNER= 6.0;      // tip chamfer/round (photo: "rounded corner", LHD = -X)
-TAB1_ANG   = [64, 116];   // TODO: factory tab angles, front pocket — the mat
-                          // wraps the circle without visible notches; caliper
+TAB1_ANG   = [45, 135];   // front-pocket tab angles: ~45 deg from the rear
+                          // (passage) centerline each side (photo IMG_5345,
+                          // 2026-09-10; both factory tabs are broken at the
+                          // tip, which is the rattle source)
+TAB_W      = 7.5;    // factory tab width (user)
+TAB_H      = 30.0;   // wall opening height (user)
+TAB_TRAVEL = 14.0;   // free-end travel at rest; folds fully into the wall
+TAB_SEAT   = 0.2;    // boss face sits this far in front of the console wall
+                     // face, so a folded flap can only bulge 0.2 mm
+TAB1_Z0    = 0.0;    // TODO: opening bottom above the pocket floor — the
+                     // photo shows the tabs sitting low, pivot ~TAB_H up
+BOSS_MARGIN= 1.5;    // boss margin around the opening
 TAB2_POS   = [[-31.5, 188], [31.5, 188]]; // photo: notch pair at the 75->51
                           // step, ~6 in from each wall; y = Y_T2_REAR; caliper
-BOSS_W     = 14.0;     // TODO: trap boss width  (match tab width + play)
-BOSS_LEN   = 6.0;      // TODO: trap boss depth into pocket
-TAB_CH_W   = 10.0;     // TODO: channel width  (tab width + ~0.4)
-TAB_CH_D   = 4.0;      // TODO: channel depth  (tab thickness + ~0.4)
+// Tray-2 tab traps (placeholder — the 75->51 step notch pair from the mat
+// photo; position/orientation still TODO). Same flap family as the
+// front-pocket tabs (TAB_W x TAB_H), but on a flat step wall, so they keep
+// the simpler box boss + channel until confirmed.
+BOSS_W     = TAB_W + 3.0;   // tray-2 trap boss width
+BOSS_LEN   = 6.0;           // TODO: tray-2 boss depth into pocket
+TAB_CH_W   = TAB_W + 0.5;   // tray-2 channel width
+TAB_CH_D   = 4.0;           // TODO: tray-2 channel depth (tab thickness + ~0.4)
 BRIDGE_LEN = 20.0;     // photo: passage-1 bridge, passenger side, spans 20 of
 BRIDGE_W   = 9.0;      // the 24 (mat slitted around it, flush with floor)
 BRIDGE_Y0  = 74.0;     // photo: ~76-88 from front edge

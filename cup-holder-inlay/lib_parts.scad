@@ -86,13 +86,20 @@ module grip_tabs(defl = 0) {
 
 // ---------- factory spring-tab traps ----------
 //
-// The four factory spring tabs (2 in the rear of the front pocket, 2 at the
-// 75->51 step of tray 2 — photo: symmetric notch pairs at both step corners)
-// are immobilised by local bosses with closed channels. The tab sits in the
-// channel; inlay material on all sides removes its free play -> no rattle.
+// The four factory spring tabs (2 in the rear of the front pocket at ~45
+// deg each side of the passage, 2 at the 75->51 step of tray 2) are spring
+// flaps 7.5 wide x 30 tall in wall openings: pivot near the top, 14 mm of
+// free-end travel, folding fully into the wall when pressed (both
+// front-pocket tabs are broken at the tip — that is the rattle source).
 //
-// TODO: boss/channel sizes and the front-pocket tab angles are estimates —
-// measure the real tabs (thickness, width, travel, pivot height).
+// Front pocket (curved wall): a flush-press boss covers the opening — a
+// tapered plate following the cone, its face TAB_SEAT (0.2 mm) in front of
+// the console wall face. The flap is trapped behind the inlay wall, so the
+// boss face is all it needs: the folded flap can only bulge 0.2 mm instead
+// of its 14 mm travel. No channel is cut in the inlay for these.
+//
+// Tray 2 (flat step wall): the simpler box boss + closed channel until the
+// tab position/orientation is confirmed. TODO.
 
 // Tapered annular-sector ring between z0..z1, following the conical pocket
 // wall: outer face at wall_in(z) + r_off1, inner at wall_in(z) + r_off0.
@@ -115,12 +122,17 @@ module trap_tapered(a0, a1, z0, z1, r_off0, r_off1) {
 
 module factory_tab_boss(p, inward, z0, h, curved) {
     if (curved) {
-        // full front-pocket height, following the lean
+        // flush-press boss over the TAB_W x TAB_H wall opening, following
+        // the cone: face at r_pocket - TAB_SEAT (0.2 mm in front of the
+        // console wall face, i.e. WALL + TOL - TAB_SEAT out from the
+        // inlay's inner face — just short of the inlay outer surface),
+        // embedded 2 mm in the inlay wall
         a = atan2(p[1] - C1[1], p[0] - C1[0]);
-        aw = BOSS_W / 2 / wall_in((LIFT + H_DEPTH) / 2) * 180 / PI;
+        aw = (TAB_W / 2 + BOSS_MARGIN) / wall_in((LIFT + H_DEPTH) / 2) * 180 / PI;
+        z0t = max(LIFT + TAB1_Z0 - BOSS_MARGIN, LIFT + 0.2);
+        z1t = LIFT + TAB1_Z0 + TAB_H + BOSS_MARGIN;
         translate(C1) rotate(a)
-            trap_tapered(-aw, aw, LIFT + 0.2, H_DEPTH - 0.2,
-                         -BOSS_LEN + 2, 0.5);
+            trap_tapered(-aw, aw, z0t, z1t, -2.0, WALL + TOL - TAB_SEAT);
     } else {
         a = atan2(inward[1], inward[0]);
         translate([p[0], p[1], z0]) rotate([0, 0, a])
@@ -130,15 +142,10 @@ module factory_tab_boss(p, inward, z0, h, curved) {
     }
 }
 
+// Channels only for the flat (tray-2) traps; the front-pocket flush-press
+// bosses need none — the flap folds behind the wall, out of the inlay.
 module factory_tab_channel(p, inward, z0, h, curved) {
-    if (curved) {
-        a = atan2(p[1] - C1[1], p[0] - C1[0]);
-        ac = TAB_CH_W / 2 / wall_in((LIFT + H_DEPTH) / 2) * 180 / PI;
-        translate(C1) rotate(a)
-            // open at the pocket-facing (inner) end of the boss, 1 mm into
-            // the wall (WALL = 2, so the channel never breaks through)
-            trap_tapered(-ac, ac, LIFT, H_DEPTH, -BOSS_LEN, 1.0);
-    } else {
+    if (!curved) {
         a = atan2(inward[1], inward[0]);
         translate([p[0], p[1], z0]) rotate([0, 0, a])
             // open at the pocket-facing (inner) end of the boss
