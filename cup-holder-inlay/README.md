@@ -8,8 +8,9 @@ four factory spring tabs (the rattle source) and adds a rattle-free grip for a
 
 - `ev6_cup_inlay.scad` — grip parameters, render switches, assembly, fit report
 - `lib_geometry.scad` — all dimensional parameters + the three-tray envelope,
-  conical front pocket, inlay shell
+  conical front pocket, inlay shell, slanted console top
 - `lib_parts.scad` — arc leaf-spring grip, factory-tab traps, test cups
+- `aframe.scad` — the A-frame divider (see below), standalone part
 - `../data/` — the source data: `EV6 Utility Cup.stl`, `IMG_5344` (mat on a
   14" MBP, top view), `IMG_5345` (front pocket with the factory tabs),
   `IMG_5346` (console slant), `IMG_5347`/`IMG_5348` (mat + A-frame divider)
@@ -110,7 +111,7 @@ Photo-derived values are soft-mat estimates (±3 mm); caliper to confirm:
   section, the seat height shifts — verify in the car. The mat also has
   slightly raised sides extending ~1 mm past the base.
 
-## The A-frame divider (not yet modeled)
+## The A-frame divider (`aframe.scad`)
 
 The car's detachable A-frame (79 wide x 61 tall, 45 at the base, circular
 cutout for the middle tray, rounded ~22 top) runs **across** the front
@@ -122,6 +123,18 @@ layers on the passenger-side console wall: two inside supports clamp onto
 Pressing the frame down tightens the press fit in the cone, the console
 walls bulge ever so slightly outward, and that tensions the three-layer
 cover just enough to stop it rattling — the owner's 0.5 mm tape shims
-(50 → 50.5 mm) strengthen the effect. The printable replacement will be
-modeled at **50.5** (the factory part is injection molded, but the shape
-lends itself to FDM). See `IMG_5347`/`IMG_5348`.
+(50 → 50.5 mm) strengthen the effect. The printable replacement is modeled
+at **50.5** (the factory part is injection molded, but the shape lends
+itself to FDM). See `IMG_5347`/`IMG_5348`.
+
+The "A" is an **arch**: two legs 45 apart in Y, a web, a rounded top (r =
+22.5, the closing semicircle over the 45), extruded 79 across the pocket.
+The outer face is trimmed to the cone (`r_pocket - TOL`) so the 79 band
+hugs it like the inlay — the factory 79 is the cone's ID at mid-height.
+
+**Assumed, not measured** (flagged in the file header): where it sits in
+Y, the cutout size/height, the floor-stud centreline and diameter, and the
+leg thickness. One open contradiction: with the rear leg *on* the passage
+the 24 mm full-height slot can't clear a circular cutout, so the model
+sits the frame in front of the passage (`AFRAME_Y0 = 20`) — confirm the
+real frame's position and whether its rear-leg opening is a slot.
