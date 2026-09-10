@@ -4,5 +4,9 @@
 *.3mf
 *.svg
 
+# keep the measured source data (STL + photos) in the repo
+!data/
+!data/*.stl
+
 # macOS
 .DS_Store

@@ -5,7 +5,7 @@ the entire product line in one phrase.
 
 3D-printed interior utility parts, one at a time. Each item fixes a small,
 daily friction in the car that no official accessory covers. One subdirectory
-per item.
+per item; measured source data (STLs, photos) lives in `data/`.
 
 ## Items
 
