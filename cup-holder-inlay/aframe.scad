@@ -4,21 +4,18 @@
 // renders as a fitted test object inside the inlay); this file only picks a
 // fit and renders it.
 //
-// The frame stands across the front pocket: 79 across (X), the arch in the
-// Y-Z section (45 base, 61 tall, rounded ~22 top). Two inside C-hook
-// supports clamp the two floor studs at 50.5 (factory 50 + the owner's
-// 0.5 shims); pressing it down cams the fit and tensions the three-layer
-// passenger-side cover. See lib_aframe for the dimensions and the ASSUMED
-// list (verify in the car).
+// The A-frame is a SOLID SAWBUCK (an extruded "A" with the counter filled):
+// 79 wide in X (spans the tray), 45 deep in Y (the base), 61 tall in Z, apex
+// up. It stands at the tray-2/tray-3 boundary; a circular cutout on one side
+// lets a bottle sit in tray 2. See lib_aframe for the dimensions and the
+// ASSUMED list (verify in the car).
 //
 // Fit (AFRAME_FIT):
-//   "car"   — the factory-style part: press-fit in the BARE pocket, standing
-//             on the mat (z = LIFT).
-//   "inlay" — the NEW slightly-smaller clamp: fits INSIDE the printed inlay's
-//             void and pushes the inlay wall outward to strain the console.
-//             AFRAME_CLEAR is the radial gap to the inlay wall — positive =
-//             slip fit (drops in, clean render), negative = press fit (wedges
-//             in and strains the console; print a small negative value).
+//   "car"   — the factory-style part: 79 wide, standing on the rear-tray
+//             floor (z=0), press-fitting the bare car tray.
+//   "inlay" — the NEW slightly-smaller divider: fits inside the printed
+//             inlay's tray-2/3 void and pushes the inlay wall outward to
+//             strain the console.
 //
 // Render:
 //   openscad -o aframe.png        aframe.scad                 // inlay fit, inlay shown
@@ -26,8 +23,8 @@
 //   (add -D 'SHOW_POCKET=true' to ghost the car cavity)
 
 $fn = 96;
-include <lib_geometry.scad>   // r_pocket, front_cone, cavity, LIFT, TOL, WALL, STUD_*
-include <lib_aframe.scad>     // aframe(fit), aframe_*() helpers
+include <lib_geometry.scad>   // TOL, WALL, inlay_shell, cavity, tray-2/3 Y layout
+include <lib_aframe.scad>     // aframe(fit), aframe_solid, aframe_z0
 
 AFRAME_FIT   = "inlay";   // "car" | "inlay"
 SHOW_POCKET  = false;     // ghost the car cavity
@@ -39,6 +36,5 @@ if (SHOW_INLAY)
     color("#d8d8d0", 0.35) inlay_shell();
 color("#b0b0a8") aframe(AFRAME_FIT);
 
-echo("aframe (", AFRAME_FIT, "): 79 x ", aframe_h(AFRAME_FIT),
-     " x 45, y0 ", AFRAME_Y0, ", z0 ", aframe_z0(AFRAME_FIT),
-     ", band off ", aframe_off(AFRAME_FIT), " from the pocket wall");
+echo("aframe (", AFRAME_FIT, "): 79 x 61 x 45 sawbuck, y0 ", AFRAME_Y0,
+     ", z0 ", aframe_z0(AFRAME_FIT));

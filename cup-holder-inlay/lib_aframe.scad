@@ -3,139 +3,104 @@
 // preview (aframe.scad) and the inlay assembly (ev6_cup_inlay.scad, where
 // it renders as a fitted test object).
 //
-// Mechanism (README: "The A-frame divider"): it stands across the front
-// pocket, 79 across (X), and its two inside supports clamp onto the two
-// floor studs at 50.5 (factory 50 + the owner's 0.5 shims). Pressing it
-// down cams the fit; the pocket wall bulges slightly outward and the
-// three-layer passenger-side cover tensions until it stops rattling.
+// What it is (user 2026-09-10): a SOLID SAWBUCK — an extruded "A" with the
+// counter (the space between the legs) filled in, so the section is a solid
+// triangle. It stands at the tray-2/tray-3 boundary in the rear console:
+// 79 wide in X (spans the tray), 45 deep in Y (the base), 61 tall in Z,
+// apex up. A circular cutout on one side lets a bottle sit in tray 2.
+// The factory part is injection molded; the shape prints fine in FDM.
 //
-// The "A" is an ARCH in the Y-Z section: 45 base between the legs, 61
-// tall, rounded top (photo "approximately 22" — modelled as the closing
-// semicircle, r = 45/2 = 22.5). The factory part is injection molded; the
-// shape prints fine in FDM.
-//
-// Requires lib_geometry.scad to be included first (r_pocket, front_cone,
-// TOL, WALL, LIFT, R_T1_BOT). No top-level instantiation here.
+// Requires lib_geometry.scad to be included first (TOL, WALL, and the
+// tray-2/3 Y layout: Y_T2_REAR, Y_P2_REAR). No top-level instantiation here.
 //
 // ================= ASSUMED — verify in the car =================
-//   STUD_Y (lib_geometry) — floor-stud centreline, from the pocket front
-//                edge (y=0). This is the FREE position parameter: the frame
-//                is positioned BY the studs it clamps, so AFRAME_Y0 below
-//                derives from it (front-leg rear face on the stud line).
-//                At STUD_Y = 20 the rear leg lands at y 57..61, in FRONT of
-//                the passage-1 entry (y ~72) — a circular cutout cannot
-//                clear the full-height passage, so the real frame either
-//                sits forward like this or its rear-leg opening is a slot,
-//                not a circle.
-//   CUTOUT_*   — "circular cutout for the middle tray": a hole through the
-//                rear leg at the passage centreline. Diameter/height are
-//                guesses sized to clear the 24 mm passage.
-//   STUD_D (lib_geometry) — floor-stud diameter.
-//   WALL_T     — leg/web thickness (~4 from the photos).
+//   AFRAME_Y0  — where it sits in Y. Set to the 75->51 step (Y_T2_REAR,
+//                y~188), i.e. the back of tray 2 / the tray-2/3 boundary.
+//                The 45 base then runs from there toward tray 3. Confirm the
+//                exact position and which step it actually sits at.
+//   CUTOUT_*   — the ~75 mm bottle circle: placed in front (toward tray 2),
+//                centred on x=0, so only its back crescent bites a ~45 mm-wide,
+//                9-10 mm-deep dent into the front slant. Confirm which side it
+//                is actually on and the exact height/depth in the car.
 // ================================================================
 
 // ---- envelope (measured 2026-09-10) ----
-AFRAME_W     = 79.0;    // across the pocket (X), the press-fit band
-AFRAME_BASE  = 45.0;    // legs' span, Y (the "45 at the base")
-AFRAME_H     = 61.0;    // total height above its floor (Z)
-AFRAME_TOP_R = AFRAME_BASE / 2;  // 22.5 — the rounded top (photo ~22)
-WALL_T       = 4.0;     // ASSUMED leg/web thickness
-// The frame is positioned BY the studs it clamps: the C-hooks sit at the
-// back face of the front leg (STUD_Y, from lib_geometry), so the front
-// leg's front face is STUD_Y - WALL_T.
-AFRAME_Y0    = STUD_Y - WALL_T;
-CUTOUT_D     = 29.0;    // ASSUMED diameter. If the frame sits back ON passage-1
-                       // (STUD_Y further back) it must clear the 24 mm passage;
-                       // if it sits forward (STUD_Y = 20) it doesn't reach it.
-                       // At CUTOUT_ZC = 10 a 29 mm hole opens into the floor —
-                       // the real size/position need a joint in-car check.
-CUTOUT_ZC    = 10.0;    // user 2026-09-10: "the cutout is ~10 mm from the bottom"
-// The stud span / line / diameter (STUD_X_SPAN, STUD_Y, STUD_D) are car
-// facts defined in lib_geometry (the inlay floor holes use them too).
+AFRAME_W    = AFR_CLAMP_W;  // clamp width across the tray (X) = 74 (lib_geometry)
+AFRAME_BASE = 45.0;   // base depth (Y), the "45 at the base"
+AFRAME_H    = 61.0;   // total height (Z), the "~6 cm tall"
+// The A-frame BRIDGES the tray-2/3 passage (passage 2, y 188..225 in
+// lib_geometry): its 45 base spans the passage gap, centred on it. The
+// console walls stay ~79 apart through here (user 2026-09-10: "the walls are
+// always at almost 8cm"), so the 79 width spans wall-to-wall. Two floor studs
+// protrude here and the frame latches onto them lego-style (see aframe()).
+AFRAME_Y0   = 184.0;  // 45 base centred on passage 2 (188..225), bridging it
+
+// ---- bottle cutout (user 2026-09-10) ----
+// A ~75 mm circle (a bottle sitting in tray 2) that only CLIPS the front of
+// the frame: its back crescent bites a ~45 mm-wide, 9-10 mm-deep dent into the
+// front slant. It is NOT a through-hole -- the circle mostly sits in tray 2.
+CUTOUT_D  = 75.0;         // the bottle circle diameter (user "~75 mm")
+CUTOUT_CY = AFRAME_Y0 - 28.0;  // ASSUMED circle centre (x=0, in front of the
+                               // base edge): 37.5-28 = 9.5 mm of crescent bites
+                               // in (~45-50 mm wide). Confirm side + position.
 
 // ---- fit ----
-// "car":   the factory-style part — the 79 band press-fits the BARE pocket
-//          cone (outer surface at r_pocket - TOL), standing on the mat.
-// "inlay": the NEW slightly-smaller clamp — it fits INSIDE the inlay's
-//          void (outer surface at r_pocket - TOL - WALL - AFRAME_CLEAR),
-//          stands on the inlay floor, and is the part that pushes the
-//          inlay wall outward to strain the console shell.
-// AFRAME_CLEAR is the radial gap to the inlay's inner wall: positive =
-// slip fit (drops in, clean render); negative = press fit (wedges in and
-// is what strains the console — print at a small negative value).
-AFRAME_CLEAR = 0.2;
+// "car":   the factory part — 79 wide, standing on the rear-tray floor
+//          (z=0), press-fitting the bare car tray.
+// "inlay": the NEW slightly-smaller divider — fits inside the inlay's
+//          tray-2/3 void and pushes the inlay wall out to strain the console.
+// (The inlay-fit sizing is worked out once the car-fit shape and position
+//  are confirmed; for now both render the same sawbuck.)
+// The base rests ON the two floor tenons (lego-brick style), so it is raised
+// AFR_STUD_H above the floor it sits on; the ~1 cm void beneath is open in
+// the middle (the passage), tenons on the sides.
+function aframe_z0(fit) = (fit == "inlay" ? WALL : 0) + AFR_STUD_H;
 
-function aframe_off(fit) =
-    fit == "inlay" ? TOL + WALL + AFRAME_CLEAR : TOL;
-function aframe_z0(fit) =
-    fit == "inlay" ? LIFT + WALL : LIFT;
-function aframe_h(fit) =
-    AFRAME_H - (fit == "inlay" ? WALL : 0);  // same absolute top either way
-
-// Arch section as a 2D profile (local x = height, local y = Y): straight
-// sides to the springline, semicircular top. h is the total height.
+// Solid-sawbuck section as a 2D profile (local x = height/Z, local y = Y):
+// a triangle, 45 base (along local y) splaying up to the apex at local x = h.
 module aframe_section(h) {
-    sl = h - AFRAME_TOP_R;
-    union() {
-        square([sl, AFRAME_BASE]);
-        translate([sl, AFRAME_BASE / 2]) circle(d = AFRAME_BASE);
-    }
+    polygon(points = [
+        [0, 0],
+        [0, AFRAME_BASE],
+        [h, AFRAME_BASE / 2],
+    ]);
 }
 
-// The solid arch, 79 across, before hollowing. Rotate -90 about Y maps
-// local z -> global -x and local x -> global z, so the extrude runs -X:
-// the origin sits at +AFRAME_W/2 and the section at local x=0 lands on
-// global z = aframe_z0(fit).
+// The solid sawbuck, 79 across (X). Rotate -90 about Y maps local z ->
+// global -x and local x -> global z, so the extrude runs -X: origin at
+// +AFRAME_W/2, base at AFRAME_Y0, floor at aframe_z0(fit).
 module aframe_solid(fit) {
     translate([AFRAME_W / 2, AFRAME_Y0, aframe_z0(fit)])
         rotate([0, -90, 0])
-            linear_extrude(AFRAME_W) aframe_section(aframe_h(fit));
+            linear_extrude(AFRAME_W) aframe_section(AFRAME_H);
 }
 
-// Cone-following band: |x| <= r_pocket(z) - aframe_off(fit). Intersecting
-// with this makes the 79 band hug the target surface like the inlay — the
-// factory part's 79 is the cone's ID at the frame's mid-height.
-module aframe_band(fit) {
-    off = aframe_off(fit);
-    front_cone(R_T1_BOT - off, r_pocket(90) - off, LIFT, 90);
-}
-
-module aframe(fit = "inlay") {
-    z0 = aframe_z0(fit);
-    h  = aframe_h(fit);
+module aframe(fit = "car") {
     difference() {
-        intersection() {
-            aframe_solid(fit);
-            aframe_band(fit);
-        }
-        // hollow: the same section offset in by WALL_T (the arch web).
-        // Runs the full width (no band applied) so it clears the tapered
-        // ends; same +AFRAME_W/2 origin as aframe_solid.
-        translate([AFRAME_W / 2, AFRAME_Y0 + WALL_T, z0 + WALL_T])
-            rotate([0, -90, 0])
-                linear_extrude(AFRAME_W)
-                    offset(-WALL_T) aframe_section(h);
-        // circular cutout for the middle tray: a hole along X through the
-        // rear leg, centred on the passage centreline (x = 0)
-        translate([0, AFRAME_Y0 + AFRAME_BASE - WALL_T / 2, z0 + CUTOUT_ZC])
-            rotate([0, 90, 0])
-                translate([0, 0, -AFRAME_W / 2])
-                    cylinder(h = AFRAME_W, d = CUTOUT_D);
-        // stud supports: two C-hooks in the front leg at +/-STUD_X_SPAN/2
-        // — a slot (STUD_D + 0.3 wide) open at the floor, cut into a small
-        // block embedded in the leg. The stud drops into the slot as the
-        // frame is set down; the 50.5 slot-centre span (factory 50 + the
-        // owner's 0.5 shims) is what cams the fit when pressed down.
-        // NOTE (inlay fit): the studs sit in the car floor below the inlay
-        // floor — the inlay floor is opened for them (STUD_HOLES,
-        // lib_geometry).
-        for (sx = [-1, 1])
-            difference() {
-                translate([sx * STUD_X_SPAN / 2 - 4, STUD_Y - 2, z0])
-                    cube([8, 4, 14]);
-                translate([sx * STUD_X_SPAN / 2 - (STUD_D + 0.3) / 2,
-                           STUD_Y - 2, z0])
-                    cube([STUD_D + 0.3, 6, 10]);
-            }
+        aframe_solid(fit);
+        // the bottle dent: a 75 mm vertical cylinder centred in front of the
+        // base edge (toward tray 2) -- only its back crescent removes material
+        translate([0, CUTOUT_CY, aframe_z0(fit) - 1])
+            cylinder(h = AFRAME_H + 2, d = CUTOUT_D);
     }
+}
+
+// ---- floor tenons (the CAR feature the frame drops onto) ----
+// Two rectangular tenons at the passage (lib_geometry AFR_STUD_*): X width
+// constant, Y length narrowing going UP (front-to-back faces slant in), ~1 cm
+// tall. No flange/latch — the taper is the press fit. Rendered as reference
+// car geometry (aframe.scad), NOT part of the printable frame.
+module aframe_tenon(sx) {
+    cx = sx * AFR_STUD_X;
+    th = 0.4;   // slab thickness for the hull endpoints
+    hull() {
+        translate([cx, AFR_STUD_Y, th / 2])
+            cube([AFR_STUD_W, AFR_STUD_L_BASE, th], center = [0, 0, 0]);
+        translate([cx, AFR_STUD_Y, AFR_STUD_H - th / 2])
+            cube([AFR_STUD_W, AFR_STUD_L_TOP, th], center = [0, 0, 0]);
+    }
+}
+module aframe_tenons() {
+    aframe_tenon(-1);
+    aframe_tenon(1);
 }

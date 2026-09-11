@@ -78,19 +78,9 @@ BRIDGE_W   = 9.0;      // the 24 (mat slitted around it, flush with floor)
 BRIDGE_Y0  = 74.0;     // photo: ~76-88 from front edge
 BRIDGE_RELIEF = 1.0;   // relief depth in the inlay passage floor under it
 
-// ---------- A-frame floor studs (interface with aframe / lib_parts) ----------
-// The two molded-floor studs the A-frame's inside supports clamp onto.
-// The span is the shimmed 50.5 (factory 50 + the owner's 0.5); that
-// interference is what cams the pocket wall outward when the frame is
-// pressed down. The studs sit BELOW the inlay floor, so STUD_HOLES opens
-// it where the studs poke through — needed for the inlay-fit frame.
-STUD_X_SPAN = 50.5;    // shimmed support span (factory 50 + 0.5)
-STUD_Y      = 20.0;    // ASSUMED: stud centreline from the pocket front
-                       // (y=0). Primary car fact — the A-frame's
-                       // AFRAME_Y0 derives from it (lib_aframe).
-STUD_D      = 5.0;     // ASSUMED stud diameter
-STUD_HOLES  = true;    // cut the floor holes in the inlay
-STUD_HOLE_D = STUD_D + 1.5;  // clearance over the stud for the C-hook slot
+// The A-frame's floor tenons are at the tray-2/3 boundary (passage 2), not
+// the front pocket. Their params live with the passage-2 Y layout below
+// (AFR_STUD_*), once the passage dimensions are in scope.
 
 // ---------- inlay / print ----------
 WALL       = 2.0;      // inlay wall thickness
@@ -122,6 +112,21 @@ Y_P2_REAR    = Y_P2_FRONT + P2_L;       // <- 51->71 step, second notch pair
 Y_T3_FRONT   = Y_P2_REAR;
 Y_T3_TAPER1  = Y_T3_FRONT + T3_TAPER_L;
 Y_T3_REAR    = Y_T3_TAPER1 + L_T3_END_L; // passenger-side (longest) extent
+
+// ---------- A-frame floor tenons (tray-2/3, passage-2 area) ----------
+// User 2026-09-10: two rectangular tenons rise ~1 cm from the molded floor at
+// the passage, filling the void beneath the (elevated) clamp and mating with
+// the mat's shape. No flange/latch: they seat snugly by tapering — the Y
+// length narrows going UP (front-to-back faces slant in), X is constant.
+// The two tenons flank the passage and leave it open in the middle.
+AFR_CLAMP_W   = 74.0;   // clamp (A-frame) width across the tray (X)
+AFR_PASSAGE_W = 50.5;   // the central passage void left open (X)
+AFR_STUD_W    = (AFR_CLAMP_W - AFR_PASSAGE_W) / 2;  // ~11.75, X (constant)
+AFR_STUD_L_BASE = 34.0; // Y length at the base (mat)
+AFR_STUD_L_TOP  = 30.0; // Y length at the top (narrower, follows the A)
+AFR_STUD_H    = 10.0;   // ~1 cm: the void beneath the clamp
+AFR_STUD_X    = AFR_PASSAGE_W / 2 + AFR_STUD_W / 2;  // ~31.1, tenon centre X
+AFR_STUD_Y    = (Y_P2_FRONT + Y_P2_REAR) / 2;  // mid passage-2 (y ~206.8)
 
 // ---------- slanted console top ----------
 // The console top is not flat: the owner's caliper reads 82 mm console-to-
@@ -280,14 +285,10 @@ module inlay_shell() {
             if (BRIDGE_RELIEF > 0)
                 translate([-P1_W / 2, BRIDGE_Y0, LIFT + WALL - BRIDGE_RELIEF])
                     cube([BRIDGE_LEN, BRIDGE_W, BRIDGE_RELIEF]);
-            // A-frame stud holes: the studs sit in the molded floor below
-            // the inlay floor; a frame fitted inside the inlay clamps them
-            // through these (the C-hook slots drop over the studs)
-            if (STUD_HOLES)
-                for (sx = [-1, 1])
-                    translate([sx * STUD_X_SPAN / 2, STUD_Y, LIFT - 0.5])
-                        cylinder(h = WALL + 1, d = STUD_HOLE_D);
         }
+        // NOTE: the A-frame's floor tenons are at passage 2 (rear section).
+        // The inlay's rear floor will need a matching recess where they rise
+        // through for the inlay-fit frame — done with the inlay-fit sizing.
 
         // ---- rear (prismatic) section ----
         difference() {
