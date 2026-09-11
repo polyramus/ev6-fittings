@@ -36,8 +36,10 @@ P1_L       = 32.0;     // passage 1 visible length, tangent -> step
 T2_W       = 75.0;     // tray 2 max width
 T2_EXP_L   = 35.0;     // tray 2 expansion length (24 -> 75)
 T2_RECT_L  = 25.0;     // tray 2 rectangular tail length
-P2_W       = 51.0;     // passage 2 width
-P2_L       = 37.5;     // passage 2 length
+P2_L       = 37.5;     // passage 2 (tray-2/3 boundary) length in Y
+// (P2_W "51 narrowing" removed 2026-09-10: photo misread. The tray is full
+//  width across the boundary — see the passage-2 trapezoid in rear_footprint
+//  and AFR_CLAMP_W / AFR_PASSAGE_W in the A-frame tenon block below.)
 T3_W_FRONT = 71.0;     // tray 3 width at front
 T3_W_REAR  = 69.5;     // tray 3 width after taper
 T3_TAPER_L = 24.0;     // tray 3 taper length
@@ -107,7 +109,7 @@ Y_T2_EXP1    = Y_T2_EXP0 + T2_EXP_L;
 Y_T2_REAR    = Y_T2_EXP1 + T2_RECT_L;   // <- 75->51 step, tab notch pair
 // passage 2 (51 x 37.5)
 Y_P2_FRONT   = Y_T2_REAR;
-Y_P2_REAR    = Y_P2_FRONT + P2_L;       // <- 51->71 step, second notch pair
+Y_P2_REAR    = Y_P2_FRONT + P2_L;       // <- tray-2/3 boundary (full width)
 // tray 3: taper 71 -> 69.5 over 24, then the long asymmetric end
 Y_T3_FRONT   = Y_P2_REAR;
 Y_T3_TAPER1  = Y_T3_FRONT + T3_TAPER_L;
@@ -177,8 +179,15 @@ module rear_footprint() {
         // -- tray 2: rectangular tail, 75 wide x 25 long
         translate([-T2_W / 2, Y_T2_EXP1]) square([T2_W, T2_RECT_L]);
 
-        // -- passage 2: 51 wide x 37.5 long (abrupt step per description)
-        translate([-P2_W / 2, Y_P2_FRONT]) square([P2_W, P2_L]);
+        // -- passage 2: FULL width, continuous with the trays (75 -> 71).
+        //    The 51 "narrowing" was a photo misread; user 2026-09-10: the
+        //    tray stays ~74-79 wide at the A-frame (see AFR_CLAMP_W).
+        polygon(points = [
+            [-T2_W / 2,       Y_P2_FRONT],
+            [ T2_W / 2,       Y_P2_FRONT],
+            [ T3_W_FRONT / 2, Y_P2_REAR],
+            [-T3_W_FRONT / 2, Y_P2_REAR],
+        ]);
 
         // -- tray 3: taper 71 -> 69.5 over 24
         polygon(points = [
@@ -300,6 +309,12 @@ module inlay_shell() {
                 linear_extrude(SLANT_CLIP_Z - WALL)
                     offset(-(WALL + TOL))
                         footprint_slab(Y_P1_REAR - 0.5, 400 + WALL + TOL);
+            // tenon clearance: the car's floor tenons rise through the inlay
+            // floor so the inlay-fit frame rests on them (car-fit is bare tray)
+            for (sx = [-1, 1])
+                translate([sx * AFR_STUD_X, AFR_STUD_Y, -0.5])
+                    cube([AFR_STUD_W + 2 * TOL, AFR_STUD_L_BASE + 2 * TOL,
+                          WALL + 1]);
             slant_cutter();
         }
     }

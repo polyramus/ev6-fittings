@@ -25,14 +25,14 @@
 // ================================================================
 
 // ---- envelope (measured 2026-09-10) ----
-AFRAME_W    = AFR_CLAMP_W;  // clamp width across the tray (X) = 74 (lib_geometry)
 AFRAME_BASE = 45.0;   // base depth (Y), the "45 at the base"
 AFRAME_H    = 61.0;   // total height (Z), the "~6 cm tall"
-// The A-frame BRIDGES the tray-2/3 passage (passage 2, y 188..225 in
-// lib_geometry): its 45 base spans the passage gap, centred on it. The
-// console walls stay ~79 apart through here (user 2026-09-10: "the walls are
-// always at almost 8cm"), so the 79 width spans wall-to-wall. Two floor studs
-// protrude here and the frame latches onto them lego-style (see aframe()).
+// (width is aframe_w(fit) -> AFR_CLAMP_W = 74, the clamp spanning the ~79
+//  tray; user 2026-09-10: "the walls are always at almost 8 cm".)
+// The A-frame sits at the tray-2/3 boundary (y 188..225 in lib_geometry);
+// its 45 base spans that region. Two floor tenons protrude here and the frame
+// rests on them (see aframe_tenons). The base is raised AFR_STUD_H above the
+// floor, leaving the passage open in the middle.
 AFRAME_Y0   = 184.0;  // 45 base centred on passage 2 (188..225), bridging it
 
 // ---- bottle cutout (user 2026-09-10) ----
@@ -45,16 +45,20 @@ CUTOUT_CY = AFRAME_Y0 - 28.0;  // ASSUMED circle centre (x=0, in front of the
                                // in (~45-50 mm wide). Confirm side + position.
 
 // ---- fit ----
-// "car":   the factory part — 79 wide, standing on the rear-tray floor
+// "car":   the factory part — AFR_CLAMP_W (74) wide, on the rear-tray floor
 //          (z=0), press-fitting the bare car tray.
-// "inlay": the NEW slightly-smaller divider — fits inside the inlay's
-//          tray-2/3 void and pushes the inlay wall out to strain the console.
-// (The inlay-fit sizing is worked out once the car-fit shape and position
-//  are confirmed; for now both render the same sawbuck.)
-// The base rests ON the two floor tenons (lego-brick style), so it is raised
-// AFR_STUD_H above the floor it sits on; the ~1 cm void beneath is open in
-// the middle (the passage), tenons on the sides.
-function aframe_z0(fit) = (fit == "inlay" ? WALL : 0) + AFR_STUD_H;
+// "inlay": the NEW divider — inset AFR_INSET each side so it fits inside the
+//          inlay's rear void and cams the wall outward on insertion. The inlay
+//          void is the car footprint (75->71) offset in by WALL+TOL, ~67-71.
+// Both rest ON the two floor tenons (lego-brick style): the base sits at the
+// tenon tops, AFR_STUD_H above the car floor, in EITHER fit (the tenons rise
+// from the car floor to z=AFR_STUD_H whether or not the inlay is present —
+// through the inlay floor for the inlay fit). The ~1 cm void beneath is open
+// in the middle (the passage), tenons on the sides.
+AFR_INSET = 4.0;   // inlay-fit inset each side (fits the inlay rear void,
+                   // tightest at the tray-3 side ~66.5 mm)
+function aframe_w(fit) = fit == "inlay" ? AFR_CLAMP_W - 2 * AFR_INSET : AFR_CLAMP_W;
+function aframe_z0(fit) = AFR_STUD_H;
 
 // Solid-sawbuck section as a 2D profile (local x = height/Z, local y = Y):
 // a triangle, 45 base (along local y) splaying up to the apex at local x = h.
@@ -66,13 +70,14 @@ module aframe_section(h) {
     ]);
 }
 
-// The solid sawbuck, 79 across (X). Rotate -90 about Y maps local z ->
-// global -x and local x -> global z, so the extrude runs -X: origin at
-// +AFRAME_W/2, base at AFRAME_Y0, floor at aframe_z0(fit).
+// The solid sawbuck, aframe_w(fit) across (X). Rotate -90 about Y maps local
+// z -> global -x and local x -> global z, so the extrude runs -X: origin at
+// +w/2, base at AFRAME_Y0, floor at aframe_z0(fit).
 module aframe_solid(fit) {
-    translate([AFRAME_W / 2, AFRAME_Y0, aframe_z0(fit)])
+    w = aframe_w(fit);
+    translate([w / 2, AFRAME_Y0, aframe_z0(fit)])
         rotate([0, -90, 0])
-            linear_extrude(AFRAME_W) aframe_section(AFRAME_H);
+            linear_extrude(w) aframe_section(AFRAME_H);
 }
 
 module aframe(fit = "car") {
