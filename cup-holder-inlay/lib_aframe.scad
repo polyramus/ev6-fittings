@@ -27,6 +27,11 @@
 // ---- envelope (measured 2026-09-10) ----
 AFRAME_BASE = 45.0;   // base depth (Y), the "45 at the base"
 AFRAME_H    = 61.0;   // total height (Z), the "~6 cm tall"
+// Side profile (IMG_5350): ASYMMETRIC. A long front slant, a short near-
+// vertical back, apex offset toward the rear, rounded top. APEX_Y is the
+// apex's offset from the front edge along the base (middle = BASE/2).
+AFRAME_APEX_Y = 28.0;    // apex toward the back (~62% of the base)
+AFRAME_TOP_R  = 6.0;     // rounded-top radius
 // (width is aframe_w(fit) -> AFR_CLAMP_W = 74, the clamp spanning the ~79
 //  tray; user 2026-09-10: "the walls are always at almost 8 cm".)
 // The A-frame sits at the tray-2/3 boundary (y 188..225 in lib_geometry);
@@ -61,13 +66,19 @@ function aframe_w(fit) = fit == "inlay" ? AFR_CLAMP_W - 2 * AFR_INSET : AFR_CLAM
 function aframe_z0(fit) = AFR_STUD_H;
 
 // Solid-sawbuck section as a 2D profile (local x = height/Z, local y = Y):
-// a triangle, 45 base (along local y) splaying up to the apex at local x = h.
+// an ASYMMETRIC triangle (IMG_5350) — front-base [0,0], back-base [0,BASE],
+// apex toward the rear at [h-R, APEX_Y] — with a rounded top: the hull of the
+// triangle and a TOP_R circle at the apex gives straight slants + a dome.
 module aframe_section(h) {
-    polygon(points = [
-        [0, 0],
-        [0, AFRAME_BASE],
-        [h, AFRAME_BASE / 2],
-    ]);
+    hull() {
+        polygon(points = [
+            [0, 0],
+            [0, AFRAME_BASE],
+            [h - AFRAME_TOP_R, AFRAME_APEX_Y],
+        ]);
+        translate([h - AFRAME_TOP_R, AFRAME_APEX_Y])
+            circle(d = 2 * AFRAME_TOP_R);
+    }
 }
 
 // The solid sawbuck, aframe_w(fit) across (X). Rotate -90 about Y maps local
@@ -91,19 +102,30 @@ module aframe(fit = "car") {
 }
 
 // ---- floor tenons (the CAR feature the frame drops onto) ----
-// Two rectangular tenons at the passage (lib_geometry AFR_STUD_*): X width
-// constant, Y length narrowing going UP (front-to-back faces slant in), ~1 cm
-// tall. No flange/latch — the taper is the press fit. Rendered as reference
-// car geometry (aframe.scad), NOT part of the printable frame.
+// Two A-shaped tenons at the passage (lib_geometry AFR_STUD_*): X width
+// constant, ~1 cm tall, Y-footprint AFR_STUD_L_BASE at the floor narrowing to
+// AFR_STUD_L_TOP at the top. The FRONT face slants back parallel to the frame's
+// front slant (the "slant that matches the inside of the a-frame", IMG_5349)
+// and the back face is near-vertical — so each tenon is a small positive "A".
+// No flange/latch — the clamp rests on the tops and the parallel front faces
+// locate it. Rendered as reference car geometry (aframe.scad), NOT part of the
+// printable frame.
+module aframe_stud_section() {
+    // 2D profile (local x = height/Z, local y = Y-depth, front = 0). Base
+    // L_BASE (front y=0 .. back y=L_BASE), front face slants back to L_TOP at
+    // the top, back face vertical.
+    polygon(points = [
+        [0, 0],                                       // front-bottom
+        [0, AFR_STUD_L_BASE],                         // back-bottom
+        [AFR_STUD_H, AFR_STUD_L_BASE],                // back-top (back vertical)
+        [AFR_STUD_H, AFR_STUD_L_BASE - AFR_STUD_L_TOP], // front-top (front slant)
+    ]);
+}
 module aframe_tenon(sx) {
     cx = sx * AFR_STUD_X;
-    th = 0.4;   // slab thickness for the hull endpoints
-    hull() {
-        translate([cx, AFR_STUD_Y, th / 2])
-            cube([AFR_STUD_W, AFR_STUD_L_BASE, th], center = [0, 0, 0]);
-        translate([cx, AFR_STUD_Y, AFR_STUD_H - th / 2])
-            cube([AFR_STUD_W, AFR_STUD_L_TOP, th], center = [0, 0, 0]);
-    }
+    translate([cx + AFR_STUD_W / 2, AFR_STUD_Y - AFR_STUD_L_BASE / 2, 0])
+        rotate([0, -90, 0])
+            linear_extrude(AFR_STUD_W) aframe_stud_section();
 }
 module aframe_tenons() {
     aframe_tenon(-1);
