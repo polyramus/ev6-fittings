@@ -300,9 +300,9 @@ module inlay_shell() {
                 translate([-P1_W / 2, BRIDGE_Y0, LIFT + WALL - BRIDGE_RELIEF])
                     cube([BRIDGE_LEN, BRIDGE_W, BRIDGE_RELIEF]);
         }
-        // NOTE: the A-frame's floor tenons are at passage 2 (rear section).
-        // The inlay's rear floor will need a matching recess where they rise
-        // through for the inlay-fit frame — done with the inlay-fit sizing.
+        // The A-frame's floor tenons are at passage 2 (rear section); the
+        // matching A-shaped cutouts are subtracted below (aframe_stud_cutout),
+        // so the inlay-fit frame can rest on them.
 
         // ---- rear (prismatic) section ----
         difference() {
@@ -314,12 +314,11 @@ module inlay_shell() {
                 linear_extrude(SLANT_CLIP_Z - WALL)
                     offset(-(WALL + TOL))
                         footprint_slab(Y_P1_REAR - 0.5, 400 + WALL + TOL);
-            // tenon clearance: the car's floor tenons rise through the inlay
-            // floor so the inlay-fit frame rests on them (car-fit is bare tray)
+            // tenon clearance: the car's A-shaped floor tenons run from the
+            // passage all the way to the console-well wall, so each needs an
+            // A-shaped cutout through the floor AND the side wall (lib_aframe).
             for (sx = [-1, 1])
-                translate([sx * AFR_STUD_X, AFR_STUD_Y, -0.5])
-                    cube([AFR_STUD_W + 2 * TOL, AFR_STUD_L_BASE + 2 * TOL,
-                          WALL + 1]);
+                aframe_stud_cutout(sx);
             slant_cutter();
         }
     }

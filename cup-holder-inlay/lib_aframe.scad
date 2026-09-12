@@ -135,3 +135,18 @@ module aframe_tenons() {
     aframe_tenon(-1);
     aframe_tenon(1);
 }
+
+// A-shaped clearance cutout for one floor tenon, subtracted from the inlay
+// (lib_geometry.inlay_shell). The tenons run from the passage ALL THE WAY to
+// the console-well wall, so the cutout is the tenon's A-profile offset out by
+// TOL, extruded from the passage edge across to past the wall — clearing the
+// tenon through BOTH the inlay floor and the side wall it butts against.
+module aframe_stud_cutout(sx) {
+    x0 = AFR_PASSAGE_W / 2;          // passage edge
+    x1 = AFR_CLAMP_W / 2 + 1;        // past the wall (clipped by the shell)
+    tx = sx > 0 ? x1 : -x0;          // extrude origin on the wall side
+    translate([tx, AFR_STUD_Y - AFR_STUD_L_BASE / 2, 0])
+        rotate([0, -90, 0])
+            linear_extrude(x1 - x0)
+                offset(TOL) aframe_stud_section();
+}

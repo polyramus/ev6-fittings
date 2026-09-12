@@ -145,7 +145,10 @@ the molded floor at the passage, one on each side (`AFR_STUD_*` in
 parallel to the frame's front slant and the back near-vertical. The frame
 rests on their tops with the central passage left open (`AFR_PASSAGE_W`
 = 50.5) — the "1 cm open area beneath the A-frame." No flange or latch; the
-parallel front faces locate the frame.
+parallel front faces locate the frame. The tenons run from the passage all
+the way to the console-well wall, so the inlay carries a matching
+**A-shaped cutout** for each — through the floor *and* the side wall it
+butts against (`aframe_stud_cutout` in `lib_aframe`).
 
 **Bottle cutout.** A ~75 mm circle on one side (`CUTOUT_*`) so a bottle in
 tray 2 sits in front of the frame; only its back crescent bites a ~45 mm
