@@ -4,15 +4,17 @@
 // renders as a fitted test object inside the inlay); this file only picks a
 // fit and renders it.
 //
-// The A-frame is a SOLID SAWBUCK (an extruded "A" with the counter filled):
-// 79 wide in X (spans the tray), 45 deep in Y (the base), 61 tall in Z, apex
-// up. It stands at the tray-2/tray-3 boundary; a circular cutout on one side
-// lets a bottle sit in tray 2. See lib_aframe for the dimensions and the
-// ASSUMED list (verify in the car).
+// The A-frame is a SOLID ASYMMETRIC SAWBUCK (an extruded "A" with the counter
+// filled — long front slant, near-vertical back, apex toward the rear,
+// rounded top): 74 wide in X (AFR_CLAMP_W, spans the tray), 45 deep in Y
+// (the base), 61 tall in Z. It stands at the tray-2/tray-3 boundary on two
+// A-shaped floor tenons; a circular cutout on one side lets a bottle sit in
+// tray 2. See lib_aframe for the dimensions and the ASSUMED list (verify in
+// the car).
 //
 // Fit (AFRAME_FIT):
-//   "car"   — the factory-style part: 79 wide, standing on the rear-tray
-//             floor (z=0), press-fitting the bare car tray.
+//   "car"   — the factory-style part: 74 wide, resting on the car's floor
+//             tenons (z = AFR_STUD_H), press-fitting the bare car tray.
 //   "inlay" — the NEW slightly-smaller divider: fits inside the printed
 //             inlay's tray-2/3 void and pushes the inlay wall outward to
 //             strain the console.
@@ -36,5 +38,5 @@ if (SHOW_INLAY)
     color("#d8d8d0", 0.35) inlay_shell();
 color("#b0b0a8") aframe(AFRAME_FIT);
 
-echo("aframe (", AFRAME_FIT, "): 79 x 61 x 45 sawbuck, y0 ", AFRAME_Y0,
+echo("aframe (", AFRAME_FIT, "): ", aframe_w(AFRAME_FIT), " x 61 x 45 sawbuck, y0 ", AFRAME_Y0,
      ", z0 ", aframe_z0(AFRAME_FIT));

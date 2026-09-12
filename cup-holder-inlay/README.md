@@ -11,11 +11,15 @@ four factory spring tabs (the rattle source) and adds a rattle-free grip for a
   conical front pocket, inlay shell, slanted console top
 - `lib_parts.scad` — arc leaf-spring grip, factory-tab traps, test cups
 - `aframe.scad` — the A-frame divider (see below), standalone part
+- `lib_aframe.scad` — the A-frame divider: parameters + geometry, shared by
+  `aframe.scad` (standalone) and the inlay assembly (fitted test object)
 - `../data/` — the source data: `EV6 Utility Cup.stl`, `IMG_5344` (mat on a
   14" MBP, top view), `IMG_5345` (front pocket with the factory tabs),
-  `IMG_5346` (console slant), `IMG_5347`/`IMG_5348` (mat + A-frame divider)
+  `IMG_5346` (console slant), `IMG_5347`/`IMG_5348` (mat + A-frame divider),
+  `IMG_5349` (console from the passenger side; the driver-side A-stud),
+  `IMG_5350` (mat + clamp on the floor, side view)
 
-## Dimension provenance (2026-09-09, updated 2026-09-10)
+## Dimension provenance (2026-09-09, updated 2026-09-12)
 
 - **Front pocket — precise (lower 62.5 mm).** `data/EV6 Utility Cup.stl`
   (Thingiverse, "EV6 Utility Cup (Precision Fit)") is a *negative* of the
@@ -36,6 +40,11 @@ four factory spring tabs (the rattle source) and adds a rattle-free grip for a
   298.9 mm, 24 mm passage, tab-notch pairs at both step corners, the 20×9 mm
   passenger-side bridge, and the long asymmetric tray-3 taper to a ~12 mm
   passenger tip (the LHD chamfer — the RHD variant is its mirror).
+- **A-frame side profile + tenons — photo (2026-09-12).** `IMG_5350` (clamp
+  side view) gives the asymmetric sawbuck contour; `IMG_5349` (console from
+  the passenger side) gives the A-shaped floor tenons. The apex offset,
+  dome radius, and tenon front-slant are read off the soft photo — caliper
+  to confirm (see the A-frame section's assumed list).
 - **Everything else** calipered by the owner. "width" = X (transverse),
   "length" = Y (fore-aft).
 
@@ -65,11 +74,13 @@ makeshift fastening, not damage.)
   plate following the cone, its face 0.2 mm in front of the console wall
   face. The flap is trapped behind the inlay wall, so the face alone limits
   its bulge to 0.2 mm instead of 14 mm — no channel needed.
-- **Tray 2** — two identical tabs on the 75→51 step faces (the mat notch
-  pair, 6 mm in from each passage-2 wall), flaps tilted 45 deg toward each
+- **Tray 2** — two identical tabs at the tray-2/3 boundary (the mat notch
+  pair, ~6 mm in from each wall, x = ±31.5), flaps tilted 45 deg toward each
   other — an X seen from above. No feature needed: the inlay's offset wall
   band runs full height over those faces, so the band's own face (0.15 mm
-  in front of the car face) is the flush-press limiter.
+  in front of the car face) is the flush-press limiter. (First described
+  against the 51-narrowing "step," since corrected to full width — re-confirm
+  the exact face.)
 
 Insertion: press all four tabs in, drop the inlay, and they stay
 immobilised.
@@ -113,28 +124,41 @@ Photo-derived values are soft-mat estimates (±3 mm); caliper to confirm:
 
 ## The A-frame divider (`aframe.scad`)
 
-The car's detachable A-frame (79 wide x 61 tall, 45 at the base, circular
-cutout for the middle tray, rounded ~22 top) runs **across** the front
-pocket: the 79 mm is the transverse (X) width, press-fit in the 75→82.46
-cone, and the "A" section stands in Y-Z (45 mm base along Y, 61 mm tall,
-rounded ~22 top). It also damps the rattle from the three loose plastic
-layers on the passenger-side console wall: two inside supports clamp onto
-**two studs in the pocket floor** (50 mm apart on the factory part).
-Pressing the frame down tightens the press fit in the cone, the console
-walls bulge ever so slightly outward, and that tensions the three-layer
-cover just enough to stop it rattling — the owner's 0.5 mm tape shims
-(50 → 50.5 mm) strengthen the effect. The printable replacement is modeled
-at **50.5** (the factory part is injection molded, but the shape lends
-itself to FDM). See `IMG_5347`/`IMG_5348`.
+The car's detachable A-frame divider, at the **tray-2 / tray-3 boundary**
+in the rear console (not the front pocket). Its job is to stop the rattle
+from the three loose plastic layers on the passenger-side console wall: the
+inlay-fit variant below drops inside the printed inlay and cams that wall
+ever so slightly outward on insertion, tensioning the cover. The factory
+part is injection molded, but the shape prints fine in FDM.
 
-The "A" is an **arch**: two legs 45 apart in Y, a web, a rounded top (r =
-22.5, the closing semicircle over the 45), extruded 79 across the pocket.
-The outer face is trimmed to the cone (`r_pocket - TOL`) so the 79 band
-hugs it like the inlay — the factory 79 is the cone's ID at mid-height.
+**Shape (side profile, `IMG_5350`).** A **solid sawbuck** — an extruded "A"
+with the counter filled, so the section is a solid triangle. It is
+**asymmetric**, not a symmetric triangle: a long front slant, a short
+near-vertical back, the apex offset toward the rear (~62% of the base,
+`AFRAME_APEX_Y`), and a rounded top (`AFRAME_TOP_R`). 74 wide in X
+(`AFR_CLAMP_W` — the tray walls are "almost 8 cm"), 45 deep in Y (the base),
+61 tall in Z.
 
-**Assumed, not measured** (flagged in the file header): where it sits in
-Y, the cutout size/height, the floor-stud centreline and diameter, and the
-leg thickness. One open contradiction: with the rear leg *on* the passage
-the 24 mm full-height slot can't clear a circular cutout, so the model
-sits the frame in front of the passage (`AFRAME_Y0 = 20`) — confirm the
-real frame's position and whether its rear-leg opening is a slot.
+**The floor tenons (`IMG_5349`).** Two **A-shaped studs** rise ~1 cm from
+the molded floor at the passage, one on each side (`AFR_STUD_*` in
+`lib_geometry`): X-constant 11.75 wide, Y 34 → 30, the front face slanted
+parallel to the frame's front slant and the back near-vertical. The frame
+rests on their tops with the central passage left open (`AFR_PASSAGE_W`
+= 50.5) — the "1 cm open area beneath the A-frame." No flange or latch; the
+parallel front faces locate the frame.
+
+**Bottle cutout.** A ~75 mm circle on one side (`CUTOUT_*`) so a bottle in
+tray 2 sits in front of the frame; only its back crescent bites a ~45 mm
+dent into the front slant.
+
+**Two fits** (`AFRAME_FIT`; widths from `aframe_w`):
+- **`"car"`** — the factory-style part: 74 wide, resting on the car's floor
+  tenons (z = `AFR_STUD_H`), press-fitting the bare tray.
+- **`"inlay"`** — the new divider: inset `AFR_INSET` (4) each side → 66
+  wide, so it drops inside the inlay's rear void and cams the wall outward.
+  Rendered in `ev6_cup_inlay.scad` with `SHOW_AFRAME=true`.
+
+**Assumed, not measured** (flagged in the `lib_aframe.scad` header — verify
+in the car): the frame's Y position (`AFRAME_Y0`), the apex offset + dome
+radius (`AFRAME_APEX_Y` / `AFRAME_TOP_R`, read off the soft photo), the
+bottle-cutout side/height/depth, and the tenon front-slant ratio.

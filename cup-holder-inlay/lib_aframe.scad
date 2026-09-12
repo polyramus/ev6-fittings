@@ -3,21 +3,25 @@
 // preview (aframe.scad) and the inlay assembly (ev6_cup_inlay.scad, where
 // it renders as a fitted test object).
 //
-// What it is (user 2026-09-10): a SOLID SAWBUCK — an extruded "A" with the
-// counter (the space between the legs) filled in, so the section is a solid
-// triangle. It stands at the tray-2/tray-3 boundary in the rear console:
-// 79 wide in X (spans the tray), 45 deep in Y (the base), 61 tall in Z,
-// apex up. A circular cutout on one side lets a bottle sit in tray 2.
-// The factory part is injection molded; the shape prints fine in FDM.
+// What it is (user 2026-09-10; contour from IMG_5350, tenons from IMG_5349,
+// 2026-09-12): a SOLID SAWBUCK — an extruded "A" with the counter filled, so
+// the section is a solid ASYMMETRIC triangle (long front slant, short
+// near-vertical back, apex offset toward the rear, rounded top — see
+// aframe_section). It stands at the tray-2/tray-3 boundary in the rear
+// console: 74 wide in X (AFR_CLAMP_W, spans the tray), 45 deep in Y (the
+// base), 61 tall in Z. A circular cutout on one side lets a bottle sit in
+// tray 2. It rests on two A-shaped floor tenons (aframe_tenons). The factory
+// part is injection molded; the shape prints fine in FDM.
 //
 // Requires lib_geometry.scad to be included first (TOL, WALL, and the
 // tray-2/3 Y layout: Y_T2_REAR, Y_P2_REAR). No top-level instantiation here.
 //
 // ================= ASSUMED — verify in the car =================
-//   AFRAME_Y0  — where it sits in Y. Set to the 75->51 step (Y_T2_REAR,
-//                y~188), i.e. the back of tray 2 / the tray-2/3 boundary.
-//                The 45 base then runs from there toward tray 3. Confirm the
-//                exact position and which step it actually sits at.
+//   AFRAME_Y0  — where it sits in Y. Set to the tray-2/3 boundary (Y_T2_REAR,
+//                y~188). The 45 base then runs from there toward tray 3.
+//                Confirm the exact position in the car.
+//   AFRAME_APEX_Y / AFRAME_TOP_R — apex offset toward the rear + rounded-top
+//                radius, read off IMG_5350 (a soft, angled photo). Caliper.
 //   CUTOUT_*   — the ~75 mm bottle circle: placed in front (toward tray 2),
 //                centred on x=0, so only its back crescent bites a ~45 mm-wide,
 //                9-10 mm-deep dent into the front slant. Confirm which side it
@@ -50,16 +54,16 @@ CUTOUT_CY = AFRAME_Y0 - 28.0;  // ASSUMED circle centre (x=0, in front of the
                                // in (~45-50 mm wide). Confirm side + position.
 
 // ---- fit ----
-// "car":   the factory part — AFR_CLAMP_W (74) wide, on the rear-tray floor
-//          (z=0), press-fitting the bare car tray.
+// "car":   the factory part — AFR_CLAMP_W (74) wide, press-fitting the bare
+//          car tray; rests on the car's floor tenons (z = AFR_STUD_H).
 // "inlay": the NEW divider — inset AFR_INSET each side so it fits inside the
 //          inlay's rear void and cams the wall outward on insertion. The inlay
 //          void is the car footprint (75->71) offset in by WALL+TOL, ~67-71.
-// Both rest ON the two floor tenons (lego-brick style): the base sits at the
-// tenon tops, AFR_STUD_H above the car floor, in EITHER fit (the tenons rise
-// from the car floor to z=AFR_STUD_H whether or not the inlay is present —
-// through the inlay floor for the inlay fit). The ~1 cm void beneath is open
-// in the middle (the passage), tenons on the sides.
+// Both rest ON the two A-shaped floor tenons: the base sits at the tenon tops,
+// AFR_STUD_H above the car floor, in EITHER fit (the tenons rise from the car
+// floor to z=AFR_STUD_H whether or not the inlay is present — through the
+// inlay floor for the inlay fit). The ~1 cm void beneath is open in the
+// middle (the passage), tenons on the sides.
 AFR_INSET = 4.0;   // inlay-fit inset each side (fits the inlay rear void,
                    // tightest at the tray-3 side ~66.5 mm)
 function aframe_w(fit) = fit == "inlay" ? AFR_CLAMP_W - 2 * AFR_INSET : AFR_CLAMP_W;

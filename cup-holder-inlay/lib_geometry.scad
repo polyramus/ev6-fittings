@@ -65,13 +65,15 @@ TAB1_Z0    = 30.0;   // opening bottom above the pocket floor (user gauge,
                      // 2026-09-10: "fairly high, ~30 mm"; pivot then ~60 up,
                      // i.e. near the top of the ~79 mm pocket)
 BOSS_MARGIN= 1.5;    // boss margin around the opening
-// Tray-2 tabs: same flap family (TAB_W x TAB_H), on the 75->51 step faces
-// (y = Y_T2_REAR, facing -Y), centred on the 12 mm ledge — the mat notch
-// pair is ~6 mm in from each passage-2 wall (photo). 38 mm above the
-// tray-2 floor = level with the front-pocket tabs (user 2026-09-10). No
-// inlay feature needed: the offset wall band over those faces is the
-// flush-press limiter (TOL of play). Documented for the A-frame work and
-// the README; not referenced by any geometry.
+// Tray-2 tabs: same flap family (TAB_W x TAB_H), at the tray-2/3 boundary
+// (y = Y_T2_REAR, facing -Y), ~6 mm in from each wall (x = +/-31.5, the mat
+// notch pair). 38 mm above the tray-2 floor = level with the front-pocket
+// tabs (user 2026-09-10). No inlay feature needed: the offset wall band over
+// those faces is the flush-press limiter (TOL of play). Documented for the
+// A-frame work and the README; not referenced by any geometry.
+// FLAG: first described against the 51-narrowing step (a 12 mm ledge), since
+// removed — passage 2 is now full width (2026-09-10). Re-confirm the exact
+// face/notch in the car now that the step is gone.
 TAB2_POS   = [[-31.5, 188], [31.5, 188]];  // y = Y_T2_REAR (188); literal
                                             // because top-level assignments
                                             // are order-dependent in OpenSCAD
@@ -106,8 +108,8 @@ Y_P1_FRONT   = Y_T1_TAN - 6;         // hidden inside the cone
 Y_T2_FRONT   = Y_P1_REAR;
 Y_T2_EXP0    = Y_T2_FRONT + L_T2_CONN;
 Y_T2_EXP1    = Y_T2_EXP0 + T2_EXP_L;
-Y_T2_REAR    = Y_T2_EXP1 + T2_RECT_L;   // <- 75->51 step, tab notch pair
-// passage 2 (51 x 37.5)
+Y_T2_REAR    = Y_T2_EXP1 + T2_RECT_L;   // <- tray-2/3 boundary, tab notch pair
+// passage 2 (full width, 75 -> 71, x 37.5)
 Y_P2_FRONT   = Y_T2_REAR;
 Y_P2_REAR    = Y_P2_FRONT + P2_L;       // <- tray-2/3 boundary (full width)
 // tray 3: taper 71 -> 69.5 over 24, then the long asymmetric end
@@ -116,11 +118,14 @@ Y_T3_TAPER1  = Y_T3_FRONT + T3_TAPER_L;
 Y_T3_REAR    = Y_T3_TAPER1 + L_T3_END_L; // passenger-side (longest) extent
 
 // ---------- A-frame floor tenons (tray-2/3, passage-2 area) ----------
-// User 2026-09-10: two rectangular tenons rise ~1 cm from the molded floor at
-// the passage, filling the void beneath the (elevated) clamp and mating with
-// the mat's shape. No flange/latch: they seat snugly by tapering — the Y
-// length narrows going UP (front-to-back faces slant in), X is constant.
-// The two tenons flank the passage and leave it open in the middle.
+// User 2026-09-10, shape from IMG_5349 (2026-09-12): two A-shaped tenons rise
+// ~1 cm from the molded floor at the passage, filling the void beneath the
+// (elevated) clamp and mating with the mat's shape. X is constant; the Y
+// footprint narrows going UP (AFR_STUD_L_BASE -> _TOP), the front face
+// slanting back parallel to the frame's front slant, the back near-vertical —
+// each is a small positive "A". No flange/latch: the frame rests on the tops
+// and the parallel front faces locate it. The two tenons flank the passage and
+// leave it open in the middle.
 AFR_CLAMP_W   = 74.0;   // clamp (A-frame) width across the tray (X)
 AFR_PASSAGE_W = 50.5;   // the central passage void left open (X)
 AFR_STUD_W    = (AFR_CLAMP_W - AFR_PASSAGE_W) / 2;  // ~11.75, X (constant)

@@ -42,10 +42,10 @@ GRIP_Z_H     = 10.0;   // pad's bottom bridge short (FDM), land on the PET
 // ================= render switches =================
 TEST_CUP      = "thermos";  // "none" | "thermos" | "pet"
 SHOW_ENVELOPE = false;
-// A-frame divider fitted inside the inlay's front-pocket void (the "inlay"
-// fit from lib_aframe — the slightly-smaller clamp that pushes the wall out).
-// Render it alone (TEST_CUP="none"): the inlay goes translucent so the
-// band-vs-wall clearance (AFRAME_CLEAR) is visible.
+// A-frame divider fitted inside the inlay's rear (tray-2/3) void (the "inlay"
+// fit from lib_aframe — the slightly-smaller clamp that cams the wall out).
+// Render it alone (TEST_CUP="none"): the inlay goes translucent so the frame
+// inside the rear void reads.
 SHOW_AFRAME   = false;
 
 // High-poly circles (kit convention, cf. motor-bench/cad/params.scad): the

@@ -100,14 +100,16 @@ module grip_tabs(defl = 0) {
 // boss face is all it needs: the folded flap can only bulge 0.2 mm instead
 // of its 14 mm travel. No channel is cut in the inlay for these.
 //
-// Tray 2 (the 75->51 step faces at y=Y_T2_REAR, facing -Y): no feature
+// Tray 2 (the tray-2/3 boundary faces at y=Y_T2_REAR, facing -Y): no feature
 // needed. The inlay's rear wall is an offset band that runs full height
 // over those faces, so the band's own face (TOL = 0.15 mm in front of the
 // car face) is the flush-press limiter: a folded flap (flush with the car
 // face) can only bulge 0.15 mm. The tabs sit 38 mm above the tray-2 floor
 // (= the same absolute height as the front-pocket tabs, user 2026-09-10),
-// centred on the 12 mm step ledge (x = +/-31.5, the mat notch pair),
-// flaps tilted 45 deg toward each other — an X seen from above.
+// ~6 mm in from each wall (x = +/-31.5, the mat notch pair), flaps tilted 45
+// deg toward each other — an X seen from above. (They were first described
+// against the 51-narrowing "step ledge," since corrected to full width —
+// re-confirm the exact face.)
 
 // Tapered annular-sector ring between z0..z1, following the conical pocket
 // wall: outer face at wall_in(z) + r_off1, inner at wall_in(z) + r_off0.
